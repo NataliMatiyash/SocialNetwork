@@ -22,10 +22,12 @@ namespace DAL.Services
     {
         UserRepository repository;
         GraphRepository graphRepository;
+        RedisRepository redisRepository;
         public UserServices()
         {
             repository = new UserRepository();
             graphRepository = new GraphRepository();
+            redisRepository = new RedisRepository();
         }
         //
         public bool CheckPassword(string nickname ,string password)
@@ -284,7 +286,13 @@ namespace DAL.Services
             List<string> ls = new List<string>();
             try
             {
+                if(redisRepository.IsInDataBase(NickNameRead()))
+                {
+                    return redisRepository.GetFollowing(NickNameRead());
+                }
+
                 ls = repository.GetFollowing(NickNameRead());
+                redisRepository.SetFollowing(NickNameRead(), ls, 10000);
                 return ls;
             }
             catch
